@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Typing Practice</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ccc;
+            font-family: monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+            transition: filter 0.3s ease;
+        }
+        .top-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        select {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #timer-display, #error-count {
+            font-size: 18px;
+            margin-top: 5px;
+        }
+        #code-container {
+            font-size: 22px;
+            color: #666;
+            white-space: pre;
+            position: relative;
+            margin-top: 20px;
+        }
+        .correct {
+            color: white;
+        }
+        .incorrect {
+            color: red;
+        }
+        #capslock-warning {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(50, 50, 50, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            font-size: 20px;
+            z-index: 10;
+        }
+        .blurred:not(#capslock-warning) {
+            filter: blur(3px);
+        }
+        #analysis {
+            display: none;
+            background: #222;
+            padding: 20px;
+            border-radius: 5px;
+            color: white;
+            text-align: center;
+        }
+        button {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="capslock-warning">Caps Lock is ON! Please turn it off.<br>Press anywhere on the screen to continue.</div>
+    <div class="top-controls">
+        <label for="timer-selection">Set Timer:</label>
+        <select id="timer-selection">
+            <option value="15">15 sec</option>
+            <option value="30">30 sec</option>
+            <option value="60" selected>60 sec</option>
+            <option value="120">120 sec</option>
+        </select>
+        <label for="language-selection">Choose Language:</label>
+        <select id="language-selection">
+            <option value="python" selected>Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="java">Java</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+        </select>
+    </div>
+    <div id="timer-display">Time Left: 60s</div>
+    <div id="error-count">Errors: 0</div>
+    <div id="code-container"></div>
+    <div id="analysis">
+        <h2>Typing Analysis</h2>
+        <p id="speed"></p>
+        <p id="final-errors"></p>
+        <p id="final-time"></p>
+        <button onclick="restartTest()">Retry</button>
+    </div>
+    <script>
+        const exampleCodes = {
+            python: "print('Hello, World!')",
+            javascript: "console.log('Hello, World!');",
+            java: "System.out.println('Hello, World!');",
+            c: "printf('Hello, World!');",
+            cpp: "std::cout << 'Hello, World!';"
+        };
+        
+        let codeText = exampleCodes.python;
+        let errorCount = 0;
+        let userInput = '';
+        let capsLockOn = false;
+        let typingStarted = false;
+        let typingPaused = false;
+        
+        document.getElementById('language-selection').addEventListener('change', loadCode);
+        document.addEventListener('keydown', handleTyping);
+        document.addEventListener('keydown', checkCapsLock);
+        document.addEventListener('click', () => {
+            if (capsLockOn) {
+                capsLockOn = false;
+                document.getElementById('capslock-warning').style.display = 'none';
+            }
+        });
+        
+        function loadCode() {
+            let language = document.getElementById('language-selection').value;
+            codeText = exampleCodes[language];
+            errorCount = 0;
+            userInput = '';
+            document.getElementById('error-count').innerText = `Errors: 0`;
+            renderCode();
+        }
+        
+        function renderCode() {
+            let displayText = '';
+            for (let i = 0; i < codeText.length; i++) {
+                if (i < userInput.length) {
+                    displayText += `<span class='${userInput[i] === codeText[i] ? "correct" : "incorrect"}'>${codeText[i]}</span>`;
+                } else {
+                    displayText += `<span>${codeText[i]}</span>`;
+                }
+            }
+            document.getElementById('code-container').innerHTML = displayText;
+        }
+        
+        function handleTyping(event) {
+            if (!typingStarted) {
+                typingStarted = true;
+                document.body.classList.add('blurred');
+            }
+            if (event.key.length === 1) {
+                userInput += event.key;
+                renderCode();
+            } else if (event.key === 'Backspace') {
+                userInput = userInput.slice(0, -1);
+                renderCode();
+            }
+        }
+
+        function checkCapsLock(event) {
+            if (event.getModifierState("CapsLock")) {
+                capsLockOn = true;
+                document.getElementById('capslock-warning').style.display = 'block';
+            } else {
+                capsLockOn = false;
+                document.getElementById('capslock-warning').style.display = 'none';
+            }
+        }
+        
+        loadCode();
+    </script>
+</body>
+</html>
