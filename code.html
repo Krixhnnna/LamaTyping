@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Typing Practice</title>
+    <title>LamaTyping - Code Typing Practice</title>
     <style>
         body {
             background-color: #121212;
@@ -15,39 +15,60 @@
             height: 100vh;
             flex-direction: column;
             text-align: center;
-            transition: filter 0.3s ease;
+            margin: 0;
         }
         .top-controls {
             display: flex;
-            gap: 20px;
+            gap: 25px;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        label {
+            font-size: 14px;
+            color: #bbb;
         }
         select {
-            background: #333;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            font-size: 16px;
+            background: #2a2a2a;
+            color: #ddd;
+            border: 1px solid #333;
+            padding: 6px 12px;
+            font-size: 14px;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.2s;
+        }
+        select:hover {
+            background: #333;
         }
         #timer-display, #error-count {
-            font-size: 18px;
-            margin-top: 5px;
+            font-size: 16px;
+            margin: 5px 0;
+            padding: 5px 10px;
+            background: #1a1a1a;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
         #code-container {
             font-size: 22px;
             color: #666;
             white-space: pre;
-            position: relative;
-            margin-top: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            min-width: 300px;
+            text-align: left;
         }
         .correct {
-            color: white;
+            color: #fff;
         }
         .incorrect {
-            color: red;
+            color: #ff5555; /* Subtle red for errors, still fits dark theme */
         }
         #capslock-warning {
             display: none;
@@ -55,64 +76,81 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(50, 50, 50, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 5px;
-            font-size: 20px;
-            z-index: 10;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
+            z-index: 20;
         }
-        .blurred:not(#capslock-warning) {
-            filter: blur(3px);
+        #capslock-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .blur-container {
+            transition: filter 0.3s ease;
+        }
+        .blur-container.blurred {
+            filter: blur(5px);
         }
         #analysis {
             display: none;
-            background: #222;
+            background: #1a1a1a;
             padding: 20px;
-            border-radius: 5px;
-            color: white;
+            border-radius: 8px;
+            color: #ddd;
             text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
         button {
-            background: #444;
-            color: white;
-            border: none;
+            background: #2a2a2a;
+            color: #ddd;
+            border: 1px solid #333;
             padding: 10px 20px;
-            font-size: 18px;
+            font-size: 16px;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #333;
         }
     </style>
 </head>
 <body>
-    <div id="capslock-warning">Caps Lock is ON! Please turn it off.<br>Press anywhere on the screen to continue.</div>
-    <div class="top-controls">
-        <label for="timer-selection">Set Timer:</label>
-        <select id="timer-selection">
-            <option value="15">15 sec</option>
-            <option value="30">30 sec</option>
-            <option value="60" selected>60 sec</option>
-            <option value="120">120 sec</option>
-        </select>
-        <label for="language-selection">Choose Language:</label>
-        <select id="language-selection">
-            <option value="python" selected>Python</option>
-            <option value="javascript">JavaScript</option>
-            <option value="java">Java</option>
-            <option value="c">C</option>
-            <option value="cpp">C++</option>
-        </select>
+    <div id="capslock-warning">
+        <div id="capslock-icon">🔒</div>
+        Caps Lock is ON! Turn it off.<br>Click to continue.
     </div>
-    <div id="timer-display">Time Left: 60s</div>
+    <div class="blur-container">
+        <div class="top-controls">
+            <label for="timer-selection">Timer:</label>
+            <select id="timer-selection">
+                <option value="15">15 sec</option>
+                <option value="30">30 sec</option>
+                <option value="60" selected>60 sec</option>
+                <option value="120">120 sec</option>
+            </select>
+            <label for="language-selection">Language:</label>
+            <select id="language-selection">
+                <option value="python" selected>Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="c">C</option>
+                <option value="cpp">C++</option>
+            </select>
+        </div>
+        <div id="timer-display">Time Left: 60s</div>
+    </div>
     <div id="error-count">Errors: 0</div>
     <div id="code-container"></div>
-    <div id="analysis">
-        <h2>Typing Analysis</h2>
-        <p id="speed"></p>
-        <p id="final-errors"></p>
-        <p id="final-time"></p>
-        <button onclick="restartTest()">Retry</button>
+    <div class="blur-container">
+        <div id="analysis">
+            <h2>Typing Analysis</h2>
+            <p id="speed"></p>
+            <p id="final-errors"></p>
+            <p id="final-time"></p>
+            <button onclick="restartTest()">Retry</button>
+        </div>
     </div>
     <script>
         const exampleCodes = {
@@ -128,8 +166,7 @@
         let userInput = '';
         let capsLockOn = false;
         let typingStarted = false;
-        let typingPaused = false;
-        
+
         document.getElementById('language-selection').addEventListener('change', loadCode);
         document.addEventListener('keydown', handleTyping);
         document.addEventListener('keydown', checkCapsLock);
@@ -137,6 +174,7 @@
             if (capsLockOn) {
                 capsLockOn = false;
                 document.getElementById('capslock-warning').style.display = 'none';
+                unblurBackground();
             }
         });
         
@@ -164,8 +202,8 @@
         function handleTyping(event) {
             if (!typingStarted) {
                 typingStarted = true;
-                document.body.classList.add('blurred');
             }
+            
             if (event.key.length === 1) {
                 userInput += event.key;
                 renderCode();
@@ -179,10 +217,24 @@
             if (event.getModifierState("CapsLock")) {
                 capsLockOn = true;
                 document.getElementById('capslock-warning').style.display = 'block';
-            } else {
+                blurBackground();
+            } else if (!event.getModifierState("CapsLock") && capsLockOn) {
                 capsLockOn = false;
                 document.getElementById('capslock-warning').style.display = 'none';
+                unblurBackground();
             }
+        }
+
+        function blurBackground() {
+            document.querySelectorAll('.blur-container').forEach(el => {
+                el.classList.add('blurred');
+            });
+        }
+
+        function unblurBackground() {
+            document.querySelectorAll('.blur-container').forEach(el => {
+                el.classList.remove('blurred');
+            });
         }
         
         loadCode();
